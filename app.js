@@ -18,6 +18,9 @@ app.use("/api", estabRouter);
 const agendaRouter = require("./routes/agenda.routes");
 app.use("/api", agendaRouter);
 
+const reservaRouter = require("./routes/reserva.routes");
+app.use("/api", reservaRouter);
+
 app.listen(Number(process.env.PORT), () =>
   console.log(`Server up and running at port ${process.env.PORT}`)
 );
