@@ -22,7 +22,8 @@ const EstabSchema = new Schema({
   rank: { type: Number, trim: true, max: 5, min: 0 },
   cnpj: { type: Number, trim: true, required: true },
   horarioDeFuncionamento: { type: String, required: true },
-  reservaId: [{ type: Schema.Types.ObjectId, ref: "Reserva" }],    
+  reservaId: [{ type: Schema.Types.ObjectId, ref: "Reserva" }],  
+  agendaId: [{ type: Schema.Types.ObjectId, ref: "Agenda" }],    
 });
 
 const EstabModel = model("Estabelecimento", EstabSchema);
