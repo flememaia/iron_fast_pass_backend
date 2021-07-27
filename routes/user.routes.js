@@ -16,7 +16,14 @@ router.post("/signup", async (req, res) => {
 
   try {
     // Recuperar a senha que está vindo do corpo da requisição
-    const { password } = req.body;
+    const { password, email } = req.body;
+     // Verifica se o email é válido
+     if (!email || !email.match(/[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/g)) {
+      // O código 400 significa Bad Request
+      return res.status(400).json({
+        error: "E-mail é um campo obrigatório e deve ser um e-mail válido",
+      });
+    }
 
     // Verifica se a senha não está em branco ou se a senha não é complexa o suficiente
     if (
@@ -27,7 +34,7 @@ router.post("/signup", async (req, res) => {
     ) {
       // O código 400 significa Bad Request
       return res.status(400).json({
-        msg: "Password is required and must have at least 8 characters, uppercase and lowercase letters, numbers and special characters.",
+        error: "Senha é obrigatória e deve conter ao menos uma letra maiúscula, uma minúscula, um número e um caractere especial e ter 8 caracteres de tamanho.",
       });
     }
 
@@ -144,51 +151,5 @@ router.put(
       // next(err);
     }
   });  
-
-// VISUALIZANDO E ATUALIZANDO UMA RESERVA 
-// cRud = Verificar uma reserva (usuário autenticado é o estabelecimento) => entendo que tem q ser na página profile
-//":id" refere-se ao id da agenda, que vai estar no parâmetro de rota 
-router.post("/agenda/:id/reserva", isAuthenticated, attachCurrentUser, async (req, res, next) => {
-    try{
-        //Extrair o "id" da Agenda do parâmeto de rota => desestruturação de obj
-        const { id } = req.params;
-      //Extrai informações do usuário logado e salva em loggedInUser
-      const loggedInUser = req.currentUser;
-
-      const newReserva = await ReservaModel.create({
-        userId: loggedInUser._id,
-        agendaId: id,
-        ...req.body
-      });
-
-    //   return res.status(201).json(newReserva)
-
-      // Insere o id da reserva recém-criada na Agenda
-      const updatedAgenda = await AgendaModel.findOneAndUpdate(
-        { _id: id },//procura a agenda pelo id = parametro de rota
-        { $push: { reservaId: newReserva._id } },
-        { new: true }
-      );
-
-      // Insere o id da reserva recém-criada na Agenda
-      const updatedUser= await UserModel.findOneAndUpdate(
-        { _id: loggedInUser._id },//procura o user pela currentuser 
-        { $push: { reservaId: newReserva._id } },
-        { new: true }
-      );
-
-      if (updatedAgenda && updatedUser) {
-        return res.status(201).json(newReserva)
-      }
-
-      return res.status(404).json({
-        error:
-          "Não foi possível gravar a reserva pois a Agenda não foi encontrada.",
-      });
-
-    } catch (err) {
-        next(err)
-    }
-  });
 
 module.exports = router;

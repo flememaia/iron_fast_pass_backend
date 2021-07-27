@@ -16,8 +16,15 @@ router.post("/signup_estab", async (req, res) => {
 
   try {
     // Recuperar a senha que está vindo do corpo da requisição
-    const { password } = req.body;
-
+    const { password, email } = req.body;
+    
+     // Verifica se o email é válido
+     if (!email || !email.match(/[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/g)) {
+      // O código 400 significa Bad Request
+      return res.status(400).json({
+        error: "E-mail é um campo obrigatório e deve ser um e-mail válido",
+      });
+    }    
     // Verifica se a senha não está em branco ou se a senha não é complexa o suficiente
     if (
       !password ||
@@ -27,7 +34,7 @@ router.post("/signup_estab", async (req, res) => {
     ) {
       // O código 400 significa Bad Request
       return res.status(400).json({
-        msg: "Password is required and must have at least 8 characters, uppercase and lowercase letters, numbers and special characters.",
+        error: "Password is required and must have at least 8 characters, uppercase and lowercase letters, numbers and special characters.",
       });
     }
 
@@ -48,7 +55,7 @@ router.post("/signup_estab", async (req, res) => {
   } catch (err) {
     console.error(err);
     // O status 500 signifca Internal Server Error
-    return res.status(500).json({ msg: JSON.stringify(err) });
+    return res.status(500).json({ error: JSON.stringify(err) });
   }
 });
 
