@@ -22,7 +22,7 @@ router.post("/agenda", isAuthenticated, attachCurrentEstab, async (req, res, nex
         { $push: { agendaId: newAgenda._id } },
         { new: true }
       );
-
+      
       if (updatedEstab) {
         return res.status(201).json(newAgenda)
       }
@@ -61,8 +61,9 @@ router.get("/agenda", isAuthenticated, attachCurrentEstab, async (req, res, next
     //Extrai informações do usuário logado e salva em loggedInUser
     const loggedInUser = req.currentUser;
 
-    const agenda = await AgendaModel.find({estabId: loggedInUser._id}).populate("estabId");
+    // const agenda = await AgendaModel.find({estabId: loggedInUser._id}).populate("estabId", "name");
     
+    const agenda = await AgendaModel.find({estabId: loggedInUser._id});
     return res.status(200).json(agenda)
   } catch (err) {
       next(err)

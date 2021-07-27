@@ -2,7 +2,7 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 
 const UserModel = require("../models/User.model");
-const generateToken = require("../config/jwt.config");
+const generateToken = require("../config/jwt.config")
 const isAuthenticated = require("../middlewares/isAuthenticated");
 const attachCurrentUser = require("../middlewares/attachCurrentUser");
 
@@ -17,6 +17,7 @@ router.post("/signup", async (req, res) => {
   try {
     // Recuperar a senha que está vindo do corpo da requisição
     const { password, email } = req.body;
+
      // Verifica se o email é válido
      if (!email || !email.match(/[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/g)) {
       // O código 400 significa Bad Request
@@ -74,7 +75,7 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res
         .status(400)
-        .json({ msg: "This email is not yet registered in our website;" });
+        .json({ error: "This email is not yet registered in our website;" });
     }
 
     // Verificar se a senha do usuário pesquisado bate com a senha recebida pelo formulário
@@ -87,14 +88,13 @@ router.post("/login", async (req, res) => {
         user: {
           name: user.name,
           email: user.email,
-          _id: user._id,
-          role: user.role,
+          _id: user._id
         },
         token,
       });
     } else {
       // 401 Significa Unauthorized
-      return res.status(401).json({ msg: "Wrong password or email" });
+      return res.status(401).json({ error: "Wrong password or email" });
     }
   } catch (err) {
     console.error(err);
@@ -115,7 +115,7 @@ router.get("/profile", isAuthenticated, attachCurrentUser, (req, res) => {
       // Responder o cliente com os dados do usuário. O status 200 significa OK
       return res.status(200).json(loggedInUser);
     } else {
-      return res.status(404).json({ msg: "User not found." });
+      return res.status(404).json({ error: "User not found." });
     }
   } catch (err) {
     console.error(err);

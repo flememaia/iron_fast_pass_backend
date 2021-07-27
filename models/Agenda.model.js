@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
 
 const AgendaSchema = new Schema({
+  nameEstab: { type: String, required: true, trim: true },
   evento: { type: String, required: true, trim: true },
   atracao: { type: String, required: true, trim: true },
   data: { type: Date },
