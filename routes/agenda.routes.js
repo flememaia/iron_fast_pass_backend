@@ -4,7 +4,6 @@ const AgendaModel = require("../models/Agenda.model");
 const isAuthenticated = require("../middlewares/isAuthenticated");
 const attachCurrentEstab = require("../middlewares/attachCurrentEstab")
 const EstabModel = require("../models/Estab.model")
-const ReservaModel = require('../models/Reserva.model')
 
 //Crud = Criar uma agenda (usuário autenticado é o estabelecimento)
 router.post("/agenda", isAuthenticated, attachCurrentEstab, async (req, res, next) => {

@@ -69,6 +69,7 @@ router.get("/reserva", isAuthenticated, attachCurrentUser, async (req, res, next
 
 
 //cRud = Read Reserva Específica (usuário autenticado é o usuário)
+// :id => id de uma reserva especifica
 router.get("/reserva/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
   try{
     const { id } = req.params

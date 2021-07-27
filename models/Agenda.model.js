@@ -8,6 +8,7 @@ const AgendaSchema = new Schema({
   limiteDeMesaDe4pessoas: { type: Number, required: true, trim: true },
   promocaoDoDia: { type: String, trim: true },
   taxa: { type: Number, required: true, trim: true },
+  status: { type: String, trim: true, enum: ["Ativa", "Não Ativa"]},
   estabId: { type: Schema.Types.ObjectId, ref: "Estabelecimento"},
   reservaId: [{ type: Schema.Types.ObjectId, ref: "Reserva" }]
 });
