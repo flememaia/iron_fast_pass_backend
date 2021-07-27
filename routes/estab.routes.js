@@ -17,7 +17,7 @@ router.post("/signup_estab", async (req, res) => {
   try {
     // Recuperar a senha que está vindo do corpo da requisição
     const { password, email } = req.body;
-    
+
      // Verifica se o email é válido
      if (!email || !email.match(/[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/g)) {
       // O código 400 significa Bad Request
@@ -85,10 +85,9 @@ router.post("/login_estab", async (req, res) => {
 
       return res.status(200).json({
         user: {
-          nameEstab: user.name,
+          name: user.name,
           email: user.email,
-          _id: user._id,
-          role: user.role,
+          _id: user._id
         },
         token,
       });

@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
 const AgendaModel = require("../models/Agenda.model");
-const isAuthenticated = require("../middlewares/isAuthenticated");
+const isAuthenticated= require("../middlewares/isAuthenticated");
 const attachCurrentUser = require("../middlewares/attachCurrentUser");
 const ReservaModel = require("../models/Reserva.model")
 const UserModel = require("../models/User.model")
@@ -49,7 +49,8 @@ router.post("/agenda/:id/reserva", isAuthenticated, attachCurrentUser, async (re
     }
   });
 
-//cRud = Read todas as reserva (usuário autenticado é o usuário)
+//FRONT => RENDERIZAR TODAS AS RESERVAS DO USUÁRIO NO CLIENT.PROFILE  
+//cRud = Read todas as reserva (usuário autenticado é o usuário) 
 router.get("/reserva", isAuthenticated, attachCurrentUser, async (req, res, next) => {
   try{
 
