@@ -15,7 +15,7 @@ const UserSchema = new Schema({
   rank: { type: Number, trim: true, max: 5, min: 0 },
   documento: { type: Number, trim: true },
   dataDeNascimento: { type: Date, trim: true },
-  disponivel: { type: String, enum: ["Sim", "Não", "Outro"] },
+  status: { type: String, enum: ["Quero flertar", "Não Disponível", "Prefiro não comentar"] },
   formaDePagamento: { type: String, enum: ["Cartão", "Dinheiro", "PIX"] },
   reservaId: [{ type: Schema.Types.ObjectId, ref: "Reserva" }], 
 });

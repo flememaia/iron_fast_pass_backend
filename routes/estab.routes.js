@@ -6,6 +6,7 @@ const generateToken = require("../config/jwt.config");
 const isAuthenticated = require("../middlewares/isAuthenticated");
 const attachCurrentEstab = require("../middlewares/attachCurrentEstab");
 const attachCurrentUser = require("../middlewares/attachCurrentUser")
+const uploader = require("../config/cloudinary.config")
 
 const salt_rounds = 10;
 
@@ -167,6 +168,7 @@ router.get("/allestab", isAuthenticated, attachCurrentUser, async (req, res, nex
   }
 });
 
+
 // cRud (READ 1 ESTABELECIMENTO ESPECÍFICO - pelo id do estabelecimento  => LOGADO & NÃO LOGADO) - HTTP GET
 // DELETEI O ATTACHCURRENTUSER/ AUTHENTICATION - ACHO Q NÃO PRECISA. E DELETEI O REQ. ACHO Q NAÕ PRECISA TB.
 router.get("/allestab/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
@@ -184,8 +186,5 @@ router.get("/allestab/:id", isAuthenticated, attachCurrentUser, async (req, res,
       next(err)
   }
 });
-
-
-
 
 module.exports = router;
