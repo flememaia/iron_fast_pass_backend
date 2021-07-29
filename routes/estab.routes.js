@@ -5,6 +5,7 @@ const EstabModel = require("../models/Estab.model");
 const generateToken = require("../config/jwt.config");
 const isAuthenticated = require("../middlewares/isAuthenticated");
 const attachCurrentEstab = require("../middlewares/attachCurrentEstab");
+const attachCurrentUser = require("../middlewares/attachCurrentUser")
 
 const salt_rounds = 10;
 
@@ -150,5 +151,41 @@ router.put(
       // next(err);
     }
   });  
+
+// cRud (READ ALL ESTABELECIMENTOS => LOGADO & NÃO LOGADO) - HTTP GET
+// DELETEI O ATTACHCURRENTUSER/ AUTHENTICATION - ACHO Q NÃO PRECISA. E DELETEI O REQ. ACHO Q NAÕ PRECISA TB.
+router.get("/allestab", isAuthenticated, attachCurrentUser, async (req, res, next) => {
+  try{
+
+    //Extrai informações do usuário logado e salva em loggedInUser
+    const loggedInUser = req.currentUser;
+    
+    const allEstab = await EstabModel.find();
+    return res.status(200).json(allEstab)
+  } catch (err) {
+      next(err)
+  }
+});
+
+// cRud (READ 1 ESTABELECIMENTO ESPECÍFICO - pelo id do estabelecimento  => LOGADO & NÃO LOGADO) - HTTP GET
+// DELETEI O ATTACHCURRENTUSER/ AUTHENTICATION - ACHO Q NÃO PRECISA. E DELETEI O REQ. ACHO Q NAÕ PRECISA TB.
+router.get("/allestab/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
+  try{
+
+    //Extrai informações do usuário logado e salva em loggedInUser
+    const loggedInUser = req.currentUser;
+
+    //Extrair o "id" do Estabelecimento específico do parâmeto de rota => desestruturação de obj
+    const { id } = req.params;
+    
+    const estab = await EstabModel.findOne({ _id: id });
+    return res.status(200).json(estab)
+  } catch (err) {
+      next(err)
+  }
+});
+
+
+
 
 module.exports = router;

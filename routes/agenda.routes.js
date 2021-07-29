@@ -4,6 +4,7 @@ const AgendaModel = require("../models/Agenda.model");
 const isAuthenticated = require("../middlewares/isAuthenticated");
 const attachCurrentEstab = require("../middlewares/attachCurrentEstab")
 const EstabModel = require("../models/Estab.model")
+const attachCurrentUser = require("../middlewares/attachCurrentUser")
 
 //Crud = Criar uma agenda (usuário autenticado é o estabelecimento)
 router.post("/agenda", isAuthenticated, attachCurrentEstab, async (req, res, next) => {
@@ -70,6 +71,34 @@ router.get("/agenda", isAuthenticated, attachCurrentEstab, async (req, res, next
   }
 });
 
+//cRud = Visualizar todas as Agendas de um estabelecimento específico (usuário autenticado é o cliente)
+router.get("/client_agendas/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
+  try{
+
+    //Extrair o "id" do estabelecimento do parâmeto de rota => desestruturação de obj
+    const { id } = req.params;
+
+    const agenda = await AgendaModel.find({estabId: id});
+    return res.status(200).json(agenda)
+  } catch (err) {
+      next(err)
+  }
+});
+
+//cRud = Detalhes de uma Agenda específica (usuário autenticado é o cliente)
+router.get("/client_agenda/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
+  try{
+
+    //Extrair o "id" da agenda específica do parâmeto de rota => desestruturação de obj
+    const { id } = req.params;
+
+    const agenda = await AgendaModel.find({_id: id});
+    return res.status(200).json(agenda)
+  } catch (err) {
+      next(err)
+  }
+});
+
 //crUd = Atualizar Agenda (usuário autenticado é o estabelecimento)
 //":id" refere-se ao id da agenda, que vai estar no parâmetro de rota 
 router.put("/agenda/:id", isAuthenticated, attachCurrentEstab, async (req, res, next) => {
@@ -87,6 +116,32 @@ router.put("/agenda/:id", isAuthenticated, attachCurrentEstab, async (req, res, 
       return res.status(200).json(updatedAgenda)
     }
     return res.status(404).json({ error: "Agenda não encontrada" })
+  } catch (err) {
+      next(err)
+  }
+});
+
+//cruD = Delete reserva (usuário autenticado é o estabelecimenti) => opção de alterar status para "Não Ativa"
+//":id" refere-se ao id da agenda, que vai estar no parâmetro de rota 
+router.put("/agenda/:id", isAuthenticated, attachCurrentEstab, async (req, res, next) => {
+  try{
+      //Extrair o "id" da Agenda do parâmeto de rota => desestruturação de obj
+      const { id } = req.params;
+    //Extrai informações do usuário logado e salva em loggedInUser
+    const loggedInUser = req.currentUser;
+
+    const deletionAgenda = await AgendaModel.findOneAndUpdate(
+      { _id: id },
+      {$set: {...req.body}},
+      { new: true}
+      );
+      
+    if(deletionAgenda){
+      return res.status(201).json(deletionAgenda)
+    }  
+    
+    return res.status(404).json({ error: "Agenda não encontrada" })
+    
   } catch (err) {
       next(err)
   }
