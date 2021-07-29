@@ -4,7 +4,8 @@ const AgendaModel = require("../models/Agenda.model");
 const isAuthenticated= require("../middlewares/isAuthenticated");
 const attachCurrentUser = require("../middlewares/attachCurrentUser");
 const ReservaModel = require("../models/Reserva.model")
-const UserModel = require("../models/User.model")
+const UserModel = require("../models/User.model");
+const attachCurrentEstab = require("../middlewares/attachCurrentEstab");
 
 //Criar = Criar uma reserva (usuário autenticado é o usuário)
 //":id" refere-se ao id da agenda, que vai estar no parâmetro de rota 
@@ -21,6 +22,10 @@ router.post("/agenda/:id/reserva", isAuthenticated, attachCurrentUser, async (re
         ...req.body
       });
 
+      const reserva = await ReservaModel.findOne({
+        id: newReserva._id,
+      }).populate("agendaId");
+
       // Insere o id da reserva recém-criada na Agenda
       const updatedAgenda = await AgendaModel.findOneAndUpdate(
         { _id: id },//procura a agenda pelo id = parametro de rota
@@ -28,7 +33,7 @@ router.post("/agenda/:id/reserva", isAuthenticated, attachCurrentUser, async (re
         { new: true }
       );
 
-      // Insere o id da reserva recém-criada na Agenda
+      // Insere o id da reserva recém-criada no usuário (cliente)
       const updatedUser= await UserModel.findOneAndUpdate(
         { _id: loggedInUser._id },//procura o user pela currentuser 
         { $push: { reservaId: newReserva._id } },
@@ -59,6 +64,25 @@ router.get("/reserva", isAuthenticated, attachCurrentUser, async (req, res, next
 
     const reserva = await ReservaModel.find({
       userId: loggedInUser._id,
+    }).populate("agendaId");
+
+    return res.status(201).json(reserva)
+
+  } catch (err) {
+      next(err)
+  }
+});
+
+//FRONT => RENDERIZAR TODAS AS RESERVAS DA AGENDA ESPECÍFICA DE UM ESTAB NO PROFILE DA AGENDA (ESTAB LOGADO)
+//cRud = Read todas as reserva (usuário autenticado é o estabelecimento) 
+router.get("/reserva_estab", isAuthenticated, attachCurrentEstab, async (req, res, next) => {
+  try{
+
+    //Extrai informações do usuário logado e salva em loggedInUser
+    const loggedInUser = req.currentUser;
+
+    const reserva = await ReservaModel.find({
+      estabId: loggedInUser._id,
     }).populate("agendaId");
 
     return res.status(201).json(reserva)

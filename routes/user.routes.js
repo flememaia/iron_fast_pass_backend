@@ -2,9 +2,11 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 
 const UserModel = require("../models/User.model");
+const EstabModel = require("../models/Estab.model")
 const generateToken = require("../config/jwt.config")
 const isAuthenticated = require("../middlewares/isAuthenticated");
 const attachCurrentUser = require("../middlewares/attachCurrentUser");
+const uploader = require("../config/cloudinary.config")
 
 const salt_rounds = 10;
 
@@ -152,4 +154,36 @@ router.put(
     }
   });  
 
+router.post('/upload', uploader.single('foto'), (req, res) => {
+ if(!req.file){
+   return res.status(500).json({ error: "Não foi possível completar o upload do arquivo"})
+ }
+
+ console.log(req.file)
+ return res.status(201).json({ url: req.file.path})
+})
+
+router.get("/allestab_teste", async (req, res, next) => {
+  try{
+    const allEstab = await EstabModel.find();
+    return res.status(200).json(allEstab)
+  } catch (err) {
+      next(err)
+  }
+});
+
+//id do estabelecimento precisaria ver do parametro de rota, pq não deixei essa autenticada
+router.get("/allestab_teste/:id", async (req, res) => {
+
+  try {
+    //Extrair o "id" do estabelecimento do parâmeto de rota => desestruturação de obj
+    const { id } = req.params;
+
+    const agenda = await EstabModel.find({_id: id});
+    return res.status(200).json(agenda)
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ msg: JSON.stringify(err) });
+  }
+});
 module.exports = router;
