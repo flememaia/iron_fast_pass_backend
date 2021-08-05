@@ -6,8 +6,10 @@ const attachCurrentUser = require("../middlewares/attachCurrentUser");
 const ReservaModel = require("../models/Reserva.model")
 const UserModel = require("../models/User.model");
 const attachCurrentEstab = require("../middlewares/attachCurrentEstab");
+const EstabModel = require("../models/Estab.model");
 
-//Criar = Criar uma reserva (usuário autenticado é o usuário)
+
+//Criar = Criar uma reserva (usuário autenticado é o CLIENTE)
 //":id" refere-se ao id da agenda, que vai estar no parâmetro de rota 
 router.post("/agenda/:id/reserva", isAuthenticated, attachCurrentUser, async (req, res, next) => {
     try{
@@ -16,14 +18,28 @@ router.post("/agenda/:id/reserva", isAuthenticated, attachCurrentUser, async (re
       //Extrai informações do usuário logado e salva em loggedInUser
       const loggedInUser = req.currentUser;
 
+      //Pegar a agenda para extrairmos o id do estabelecimento => estabId => agenda.estabId
+      const agenda = await AgendaModel.findOne({
+        _id: id,
+      })
+
+      // estabId => agenda.estabId
       const newReserva = await ReservaModel.create({
         userId: loggedInUser._id,
         agendaId: id,
+        estabId: agenda.estabId,
+        //não tem como preencher os detalhes abaixo, pq não estão no modelo. Podemos renderizar no FRONT.
+        // nameEstab: agenda.nameEstab, 
+        // evento: agenda.evento,
+        // atracao: agenda.atracao,
+        // data: agenda.data,
+        // promocaoDoDia:agenda.promocaoDoDia,
+        // taxa: agenda.taxa,
         ...req.body
       });
 
       const reserva = await ReservaModel.findOne({
-        id: newReserva._id,
+        _id: newReserva._id,
       }).populate("agendaId");
 
       // Insere o id da reserva recém-criada na Agenda
@@ -34,13 +50,20 @@ router.post("/agenda/:id/reserva", isAuthenticated, attachCurrentUser, async (re
       );
 
       // Insere o id da reserva recém-criada no usuário (cliente)
-      const updatedUser= await UserModel.findOneAndUpdate(
+      const updatedUser = await UserModel.findOneAndUpdate(
         { _id: loggedInUser._id },//procura o user pela currentuser 
         { $push: { reservaId: newReserva._id } },
         { new: true }
       );
 
-      if (updatedAgenda && updatedUser) {
+      // Insere o id da reserva recém-criada no estabelecimento 
+      const updatedEstab = await EstabModel.findOneAndUpdate(
+        { _id: agenda.estabId, },//procura o estabelecimento para gravar a reserva
+        { $push: { reservaId: newReserva._id } },
+        { new: true }
+      );
+
+      if (updatedAgenda && updatedUser && updatedEstab) {
         return res.status(201).json(newReserva)
       }
 
@@ -73,17 +96,16 @@ router.get("/reserva", isAuthenticated, attachCurrentUser, async (req, res, next
   }
 });
 
-//FRONT => RENDERIZAR TODAS AS RESERVAS DA AGENDA ESPECÍFICA DE UM ESTAB NO PROFILE DA AGENDA (ESTAB LOGADO)
-//cRud = Read todas as reserva (usuário autenticado é o estabelecimento) 
+
+//cRud = Read ESTABELECIMENTO - Todas as Reservas do estabelecimento
 router.get("/reserva_estab", isAuthenticated, attachCurrentEstab, async (req, res, next) => {
   try{
-
     //Extrai informações do usuário logado e salva em loggedInUser
     const loggedInUser = req.currentUser;
 
     const reserva = await ReservaModel.find({
       estabId: loggedInUser._id,
-    }).populate("agendaId");
+    })
 
     return res.status(201).json(reserva)
 
@@ -92,34 +114,70 @@ router.get("/reserva_estab", isAuthenticated, attachCurrentEstab, async (req, re
   }
 });
 
+// //cRud = DETAILS - Read Reserva Específica (usuário autenticado é o usuário)
+// //":id" refere-se ao id da reserva específica, que vai estar no parâmetro de rota 
+// router.get("/reserva/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
+//   try{
+//     const { id } = req.params
+//     //Extrai informações do usuário logado e salva em loggedInUser
+//     const loggedInUser = req.currentUser;
 
-//cRud = Read Reserva Específica (usuário autenticado é o usuário)
-// :id => id de uma reserva especifica
-router.get("/reserva/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
+//     const reserva = await ReservaModel.findOne({_id: id})
+
+//     if(reserva){
+//       return res.status(201).json(reserva)
+//     }  
+//     return res.status(404).json({ error: "Reserva não encontrada" })
+//   } catch (err) {
+//       next(err)
+//   }
+// });
+
+//cRud = DETAILS - Read Reserva Específica (usuário autenticado é o ESTABELECIMENTO)
+//":id" refere-se ao id da reserva específica, que vai estar no parâmetro de rota 
+router.get("/reserva/:id", async (req, res, next) => {
   try{
     const { id } = req.params
-    //Extrai informações do usuário logado e salva em loggedInUser
-    const loggedInUser = req.currentUser;
 
-    const reserva = await ReservaModel.findOne({
-      _id: id,
-    }).populate("agendaId");
+    const reserva = await ReservaModel.findOne({_id: id})
 
-    return res.status(201).json(reserva)
-
+    if(reserva){
+      return res.status(201).json(reserva)
+    }  
+    return res.status(404).json({ error: "Reserva não encontrada" })
   } catch (err) {
       next(err)
   }
 });
+
+// //crUd = Update Reserva Específica (usuário autenticado é o usuário)
+// //":id" refere-se ao id da reserva específica, que vai estar no parâmetro de rota 
+// router.put("/reserva/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
+//   try{
+//     const { id } = req.params
+//     //Extrai informações do usuário logado e salva em loggedInUser
+//     const loggedInUser = req.currentUser;
+
+//     const reservaUpdated = await ReservaModel.findOneAndUpdate(
+//       {_id: id},
+//       {$set: {...req.body}},
+//       { new: true })
+
+//     if(reservaUpdated){
+//       return res.status(201).json(reservaUpdated)
+//     }  
+//     return res.status(404).json({ error: "Reserva não encontrada" })
+//   } catch (err) {
+//       next(err)
+//   }
+// });
 
 //crUd = Update Reserva Específica (usuário autenticado é o usuário)
 //":id" refere-se ao id da reserva específica, que vai estar no parâmetro de rota 
-router.put("/reserva/:id", isAuthenticated, attachCurrentUser, async (req, res, next) => {
+router.put("/reserva/:id", async (req, res, next) => {
   try{
     const { id } = req.params
-    //Extrai informações do usuário logado e salva em loggedInUser
-    const loggedInUser = req.currentUser;
-
+    
     const reservaUpdated = await ReservaModel.findOneAndUpdate(
       {_id: id},
       {$set: {...req.body}},
