@@ -105,7 +105,7 @@ router.get("/reserva_estab", isAuthenticated, attachCurrentEstab, async (req, re
 
     const reserva = await ReservaModel.find({
       estabId: loggedInUser._id,
-    })
+    }).populate("agendaId");
 
     return res.status(201).json(reserva)
 
@@ -139,7 +139,7 @@ router.get("/reserva/:id", async (req, res, next) => {
   try{
     const { id } = req.params
 
-    const reserva = await ReservaModel.findOne({_id: id})
+    const reserva = await ReservaModel.findOne({_id: id}).populate("agendaId");
 
     if(reserva){
       return res.status(201).json(reserva)

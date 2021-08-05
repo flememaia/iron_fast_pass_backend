@@ -39,7 +39,7 @@ router.post("/agenda", isAuthenticated, attachCurrentEstab, async (req, res, nex
 
 //cRud = Visualizar agenda específica (usuário autenticado é o estabelecimento)
 //":id" refere-se ao id da agenda, que vai estar no parâmetro de rota 
-router.get("/agenda/:id", isAuthenticated, attachCurrentEstab, async (req, res, next) => {
+router.get("/agenda/:id", async (req, res, next) => {
   try{
     //Extrair o "id" da Agenda do parâmeto de rota => desestruturação de obj
     const { id } = req.params;
